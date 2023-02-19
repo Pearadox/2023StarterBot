@@ -8,15 +8,21 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.GripperSubsystem;
 
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -29,19 +35,20 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private AHRS _gyro = new AHRS(SPI.Port.kMXP);
+  private final GripperSubsystem _gripper = new GripperSubsystem();
+  private final ArmSubsystem _arm = new ArmSubsystem();
   private DriveTrain _drivetrain = new DriveTrain(_gyro);
   private Joystick _joystick = new Joystick(0);
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final XboxController _driverController =
+      new XboxController(OperatorConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
     _drivetrain.setDefaultCommand(new ArcadeDrive(_drivetrain, _joystick));
-
   }
 
   /**
@@ -54,13 +61,44 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    //set up gripper open/close
+    new JoystickButton(_driverController, XboxController.Button.kRightBumper.value)
+      .onTrue(new InstantCommand(() -> _gripper.openGripper()))
+      .onFalse(new InstantCommand(() -> _gripper.closeGripper()));
+
+    //set up arm preset positions
+    new JoystickButton(_driverController, XboxController.Button.kA.value)
+      .onTrue(new InstantCommand(() -> _arm.setTargetPosition(Constants.Arm.kHomePosition, _gripper)));
+    new JoystickButton(_driverController, XboxController.Button.kX.value)
+      .onTrue(new InstantCommand(() -> _arm.setTargetPosition(Constants.Arm.kScoringPosition, _gripper)));
+    new JoystickButton(_driverController, XboxController.Button.kY.value)
+      .onTrue(new InstantCommand(() -> _arm.setTargetPosition(Constants.Arm.kIntakePosition, _gripper)));
+    new JoystickButton(_driverController, XboxController.Button.kB.value)
+      .onTrue(new InstantCommand(() -> _arm.setTargetPosition(Constants.Arm.kFeederPosition, _gripper)));
+
+    //set up arm manual and auto functions
+    _arm.setDefaultCommand(new RunCommand(
+      () ->
+        _arm.runAutomatic()
+      , _arm)
+    );
+    new Trigger(() -> 
+      Math.abs(_driverController.getRightTriggerAxis() - _driverController.getLeftTriggerAxis()) > Constants.OperatorConstants.kArmManualDeadband
+      ).whileTrue(new RunCommand(
+        () ->
+          _arm.runManual((_driverController.getRightTriggerAxis() - _driverController.getLeftTriggerAxis()) * Constants.OperatorConstants.kArmManualScale)
+        , _arm));
+
+
+
+
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    // _driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
 
   /**

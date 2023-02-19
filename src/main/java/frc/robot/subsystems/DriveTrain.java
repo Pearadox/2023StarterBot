@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.JoystickConstants;
 
@@ -25,7 +26,6 @@ public class DriveTrain extends SubsystemBase {
   private CANSparkMax _frontRight = new CANSparkMax(DriveTrainConstants.FRONTRIGHT, MotorType.kBrushless);
   private CANSparkMax _backLeft = new CANSparkMax(DriveTrainConstants.BACKLEFT, MotorType.kBrushless);
   private CANSparkMax _backRight = new CANSparkMax(DriveTrainConstants.BACKRIGHT, MotorType.kBrushless);
-  
 
   private DifferentialDrive _drive = new DifferentialDrive(_frontLeft, _frontRight);
 
@@ -42,6 +42,17 @@ public class DriveTrain extends SubsystemBase {
     _frontRight.restoreFactoryDefaults();
     _backLeft.restoreFactoryDefaults();
     _backRight.restoreFactoryDefaults();
+
+    _frontLeft.setInverted(Constants.DriveTrainConstants.kRearLeftInverted);
+    _frontLeft.setSmartCurrentLimit(Constants.DriveTrainConstants.kCurrentLimit);
+    _frontRight.setInverted(Constants.DriveTrainConstants.kRearLeftInverted);
+    _frontRight.setSmartCurrentLimit(Constants.DriveTrainConstants.kCurrentLimit);
+    _backLeft.setInverted(Constants.DriveTrainConstants.kRearLeftInverted);
+    _backLeft.setSmartCurrentLimit(Constants.DriveTrainConstants.kCurrentLimit);
+    _backRight.setInverted(Constants.DriveTrainConstants.kRearLeftInverted);
+    _backRight.setSmartCurrentLimit(Constants.DriveTrainConstants.kCurrentLimit);
+
+    // Set idle mode maybe? m_rearLeftMotor.setIdleMode(IdleMode.kBrake);
 
     _backLeft.follow(_frontLeft);
     _backRight.follow(_frontRight);
@@ -60,9 +71,9 @@ public class DriveTrain extends SubsystemBase {
 
     _frontLeftEncoder.setPositionConversionFactor(DriveTrainConstants.kDistancePerWheelRevolutionMeters / DriveTrainConstants.kGearReduction);
     _frontRightEncoder.setPositionConversionFactor(DriveTrainConstants.kDistancePerWheelRevolutionMeters / DriveTrainConstants.kGearReduction);
-
-
+    
     resetEncoders();
+
     _odometry = new DifferentialDriveOdometry(_gyro.getRotation2d(), _frontLeftEncoder.getPosition(), -_frontRightEncoder.getPosition());
   }
 
@@ -72,13 +83,13 @@ public class DriveTrain extends SubsystemBase {
     // This method will be called once per scheduler run
     _odometry.update(_gyro.getRotation2d(), _frontLeftEncoder.getPosition(), -_frontRightEncoder.getPosition());
 
-    SmartDashboard.putNumber("Gyro", _gyro.getAngle());
-    SmartDashboard.putNumber("frontLeftEnc", _frontLeftEncoder.getPosition());
-    SmartDashboard.putNumber("frontRightEnc", -_frontRightEncoder.getPosition());
-    SmartDashboard.putNumber("backLeftEnc", _backLeftEncoder.getPosition());
-    SmartDashboard.putNumber("backRightEnc", _backRightEncoder.getPosition());
-    SmartDashboard.putNumber("Pose X", _odometry.getPoseMeters().getX());
-    SmartDashboard.putNumber("Pose y", _odometry.getPoseMeters().getY());
+    // SmartDashboard.putNumber("Gyro", _gyro.getAngle());
+    // SmartDashboard.putNumber("frontLeftEnc", _frontLeftEncoder.getPosition());
+    // SmartDashboard.putNumber("frontRightEnc", -_frontRightEncoder.getPosition());
+    // SmartDashboard.putNumber("backLeftEnc", _backLeftEncoder.getPosition());
+    // SmartDashboard.putNumber("backRightEnc", _backRightEncoder.getPosition());
+    // SmartDashboard.putNumber("Pose X", _odometry.getPoseMeters().getX());
+    // SmartDashboard.putNumber("Pose y", _odometry.getPoseMeters().getY());
   }
   
   public void teleopDrive(Joystick joystick) {
