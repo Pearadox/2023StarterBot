@@ -42,9 +42,9 @@ public final class Constants {
         Units.inchesToMeters(23));
     public static final double kPDriveVel = 0; //kp = 100.66
 
-    public static final boolean kFrontLeftInverted = true;
+    public static final boolean kFrontLeftInverted = false;
     public static final boolean kFrontRightInverted = false;
-    public static final boolean kRearLeftInverted = true;
+    public static final boolean kRearLeftInverted = false;
     public static final boolean kRearRightInverted = false;
 
     public static final int kCurrentLimit = 55;

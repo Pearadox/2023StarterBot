@@ -5,27 +5,26 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.JoystickConstants;
+import frc.lib.drivers.*;
 
 public class DriveTrain extends SubsystemBase {
-  private CANSparkMax _frontLeft = new CANSparkMax(DriveTrainConstants.FRONTLEFT, MotorType.kBrushless );
-  private CANSparkMax _frontRight = new CANSparkMax(DriveTrainConstants.FRONTRIGHT, MotorType.kBrushless);
-  private CANSparkMax _backLeft = new CANSparkMax(DriveTrainConstants.BACKLEFT, MotorType.kBrushless);
-  private CANSparkMax _backRight = new CANSparkMax(DriveTrainConstants.BACKRIGHT, MotorType.kBrushless);
+  private PearadoxSparkMax _frontLeft = new PearadoxSparkMax(DriveTrainConstants.FRONTLEFT, MotorType.kBrushless, IdleMode.kBrake, Constants.DriveTrainConstants.kCurrentLimit, Constants.DriveTrainConstants.kFrontLeftInverted);
+  private PearadoxSparkMax _frontRight = new PearadoxSparkMax(DriveTrainConstants.FRONTRIGHT, MotorType.kBrushless, IdleMode.kBrake, Constants.DriveTrainConstants.kCurrentLimit, Constants.DriveTrainConstants.kFrontRightInverted);
+  private PearadoxSparkMax _backLeft = new PearadoxSparkMax(DriveTrainConstants.BACKLEFT, MotorType.kBrushless, IdleMode.kBrake, Constants.DriveTrainConstants.kCurrentLimit, Constants.DriveTrainConstants.kRearLeftInverted, _frontLeft);
+  private PearadoxSparkMax _backRight = new PearadoxSparkMax(DriveTrainConstants.BACKRIGHT, MotorType.kBrushless, IdleMode.kBrake, Constants.DriveTrainConstants.kCurrentLimit, Constants.DriveTrainConstants.kRearRightInverted, _frontRight);
 
   private DifferentialDrive _drive = new DifferentialDrive(_frontLeft, _frontRight);
 
@@ -38,29 +37,6 @@ public class DriveTrain extends SubsystemBase {
 
   /** Creates a new DriveTrain. */
   public DriveTrain(AHRS gyro) {
-    _frontLeft.restoreFactoryDefaults();
-    _frontRight.restoreFactoryDefaults();
-    _backLeft.restoreFactoryDefaults();
-    _backRight.restoreFactoryDefaults();
-
-    _frontLeft.setInverted(Constants.DriveTrainConstants.kRearLeftInverted);
-    _frontLeft.setSmartCurrentLimit(Constants.DriveTrainConstants.kCurrentLimit);
-    _frontRight.setInverted(Constants.DriveTrainConstants.kRearLeftInverted);
-    _frontRight.setSmartCurrentLimit(Constants.DriveTrainConstants.kCurrentLimit);
-    _backLeft.setInverted(Constants.DriveTrainConstants.kRearLeftInverted);
-    _backLeft.setSmartCurrentLimit(Constants.DriveTrainConstants.kCurrentLimit);
-    _backRight.setInverted(Constants.DriveTrainConstants.kRearLeftInverted);
-    _backRight.setSmartCurrentLimit(Constants.DriveTrainConstants.kCurrentLimit);
-
-    // Set idle mode maybe? m_rearLeftMotor.setIdleMode(IdleMode.kBrake);
-
-    _backLeft.follow(_frontLeft);
-    _backRight.follow(_frontRight);
-
-    _frontLeft.burnFlash();
-    _frontRight.burnFlash();
-    _backLeft.burnFlash();
-    _backRight.burnFlash();
 
     _gyro = gyro;
 
